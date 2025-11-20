@@ -474,7 +474,7 @@ bool tobool(std::any x)
         if (val1.type()==typeid(std::string))
         {
           std::string ans="",s=std::any_cast<std::string>(val1);
-          int k=std::any_cast<int>(val2);
+          int k=(std::any_cast<int2048>(val2)).toint();
           for (int i=1;i<=k;i++){ans+=s;}
           scope.varRegister(var1.argname,ans);
         }
