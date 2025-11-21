@@ -801,14 +801,7 @@ bool tobool(std::any x)
         }
         else
         {
-          if (comp==(int)Python3Parser::EQUALS)
-          {
-            res2=0;
-          }
-          else
-          {
-            res2=1;
-          }
+          res2=0;//None与非None比较返回False
         }
       }
       else if (lstval.type()==typeid(std::string)&&curval.type()==typeid(std::string))
@@ -1139,8 +1132,7 @@ bool tobool(std::any x)
   }
 
   virtual std::any visitFormat_string(Python3Parser::Format_stringContext *ctx) override {
-    /*std::vector<antlr4::tree::TerminalNode *>vstr=ctx->FORMAT_STRING_LITERAL();
-    int len1=vstr.size(),len2=vtest.size(),p1=0,p2=0;*/
+
     std::vector<Python3Parser::TestlistContext *>vtest=ctx->testlist();
     std::string res="";
     std::string s=ctx->getText();int len=s.length();
