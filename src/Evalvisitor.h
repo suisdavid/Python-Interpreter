@@ -26,36 +26,65 @@ struct arg
 {
   std::string argname;
   std::any init_val;
-  arg(std::string _argname,std::any _init_val)
+  bool global;
+  arg(std::string _argname,std::any _init_val,bool g=0)
   {
-    argname=_argname;init_val=_init_val;
+    argname=_argname;init_val=_init_val;global=g;
   }
 };
 class Scope
 {
     public:
       std::unordered_map<std::string,int>funcid;
-      std::unordered_map<std::string,int>varid;
+      std::vector<std::string>var_name;
       std::vector<std::any>var_val;
+      std::vector<bool>is_global;
       std::vector<std::vector<arg> >funcarg;
       std::vector<Python3Parser::SuiteContext *>funcpos;
       int func_cnt,var_cnt;
       Scope(){func_cnt=var_cnt=0;}
-      void varRegister(std::string varname,std::any val)
+      int find(std::string varname)
       {
-        if (!varid.count(varname))
+        int sz=var_name.size();
+        for (int i=sz-1;i>=0;i--)
         {
-          varid[varname]=var_cnt++;
+          if (var_name[i]==varname)
+          {
+            return i;
+          }
+        }
+        return -1;
+      }
+      void varRegister(std::string varname,std::any val,bool global=0)
+      {
+        int x=find(varname);
+        if (x==-1)
+        {
+          var_cnt++;
+          var_name.push_back(varname);
           var_val.push_back(val);
+          is_global.push_back(global);
         }
         else
         {
-          var_val[varid[varname]]=val;
+          var_val[x]=val;
         }
       }
-      std::any varGet(std::string varname)
+      arg varRegisterorget(std::string varname,bool global=0)
       {
-        return var_val[varid[varname]];
+        int x=find(varname);
+        if (x==-1)
+        {
+          var_cnt++;
+          var_name.push_back(varname);
+          var_val.push_back(none());
+          is_global.push_back(global);
+          return arg(varname,none(),global);
+        }
+        else
+        {
+          return arg(varname,var_val[x],is_global[x]);
+        }
       }
       void funcRegister(std::string funcname,std::vector<arg>arglist,Python3Parser::SuiteContext * ctx)
       {
@@ -75,8 +104,11 @@ class Scope
 class EvalVisitor : public Python3ParserBaseVisitor
  {
 	// TODO: override all methods of Python3ParserBaseVisitor
-  Scope scope;
-std::any disarg(std::any x)
+  public:
+    int in_function;
+    Scope scope;
+    EvalVisitor(){in_function=0;}
+  std::any disarg(std::any x)
 {
   if (x.type()==typeid(arg))
   {
@@ -321,54 +353,46 @@ bool tobool(std::any x)
         {
           return tobool(arglist[0].init_val);
         }
-        std::vector<arg>replace;
-        std::unordered_map<std::string,bool>in_arg;
-        int sz=arglist.size(),id=scope.funcid[funcname];
+        std::vector<arg>buffer;
+        int id=scope.funcid[funcname],sz=scope.funcarg[id].size();
+        while (scope.var_cnt&&scope.is_global[scope.var_cnt-1]==0)
+        {
+          buffer.push_back(arg(scope.var_name[scope.var_cnt-1],scope.var_val[scope.var_cnt-1]));
+          scope.var_cnt--;
+          scope.is_global.pop_back();
+          scope.var_name.pop_back();scope.var_val.pop_back();
+        }
+        for (int i=0;i<sz;i++)
+        {
+          arg v=scope.funcarg[id][i];
+          scope.var_cnt++;
+          scope.var_name.push_back(v.argname);scope.var_val.push_back(v.init_val);scope.is_global.push_back(0);
+        }
+        sz=arglist.size();
         for (int i=0;i<sz;i++)
         {
           arg v=arglist[i];
           if (v.argname=="")
           {
-              v.argname=scope.funcarg[id][i].argname;
+            v.argname=scope.funcarg[id][i].argname;
           }
-          in_arg[v.argname]=1;
-          if (scope.varid.count(v.argname))
-          {
-              int id=scope.varid[v.argname];
-              replace.push_back(arg(v.argname,scope.var_val[id]));
-              scope.var_val[id]=v.init_val;
-          }
-          else
-          {
-              scope.varRegister(v.argname,v.init_val);
-          }
+          scope.varRegister(v.argname,v.init_val);
         }
-        sz=scope.funcarg[id].size();
-        for (int i=0;i<sz;i++)
-        {
-          arg v=scope.funcarg[id][i];
-          if (!in_arg.count(v.argname))
-          {
-            if (scope.varid.count(v.argname))
-            {
-                int id=scope.varid[v.argname];
-                replace.push_back(arg(v.argname,scope.var_val[id]));
-                scope.var_val[id]=v.init_val;
-            }
-            else
-            {
-                scope.varRegister(v.argname,v.init_val);
-            }
-          }
-        }
-        in_arg.clear();
+        in_function++;
         std::any res=disarg(visitSuite(scope.funcpos[id]));
-        sz=replace.size();
-        for (int i=0;i<sz;i++)
+        in_function--;
+        while (scope.var_cnt&&scope.is_global[scope.var_cnt-1]==0)
         {
-          arg v=replace[i];
-          int id=scope.varid[v.argname];
-          scope.var_val[id]=v.init_val;
+          scope.var_cnt--;
+          scope.is_global.pop_back();
+          scope.var_name.pop_back();scope.var_val.pop_back();
+        }//pop local variables
+        sz=buffer.size();
+        for (int i=sz-1;i>=0;i--)
+        {
+          arg v=buffer[i];
+          scope.var_cnt++;
+          scope.var_name.push_back(v.argname);scope.var_val.push_back(v.init_val);scope.is_global.push_back(0);
         }
         return res;
       }
@@ -415,11 +439,7 @@ bool tobool(std::any x)
 
   virtual std::any visitTfpdef(Python3Parser::TfpdefContext *ctx) override {
       std::string argname=ctx->NAME()->getText();
-      if (!scope.varid.count(argname))
-      {
-        scope.varRegister(argname,none());
-      }
-      return arg(argname,scope.varGet(argname));
+      return arg(argname,none());
   }
 
   virtual std::any visitStmt(Python3Parser::StmtContext *ctx) override {
@@ -998,11 +1018,14 @@ bool tobool(std::any x)
     if (ctx->NAME())
     {
       std::string argname=ctx->NAME()->getText();
-      if (!scope.varid.count(argname))
+      if (!in_function)
       {
-        scope.varRegister(argname,none());
+        return scope.varRegisterorget(argname,1);
       }
-      return arg(argname,scope.varGet(argname));
+      else
+      { 
+        return scope.varRegisterorget(argname);
+      }
     }
     else if (ctx->NUMBER())
     {
