@@ -119,7 +119,7 @@ void Getinv(std::vector<int>f,int *G,int t)
 {
   int n=f.size();G[0]=0;
 	G[1]=basis*basis/(f[0]*basis+(n>1?f[1]:0));
-  for (int s=1;(s<maxs||(1<<s)<t*8);s++)
+  for (int s=1;(s<maxs||(1<<s)<t*16);s++)
   {
       int llim=(1<<s)*2;
       for (int i=0;i<(1<<s);i++)
