@@ -230,25 +230,21 @@ std::string tostring(std::any x)
     double y=std::any_cast<double>(x);
     std::string res="";
     if (y<0){y=-y;res="-";}
-    int intpart=(int)y;y-=intpart;
+    int intpart=(int)y;
     if (intpart==0){res+="0";}
     std::vector<int>digit;
     while (intpart>0)
     {
       digit.push_back(intpart%10);intpart/=10;
     }
-    int sz=digit.size();
+    int sz=digit.size();intpart=(int)y;
     for (int i=sz-1;i>=0;i--){res+=(digit[i]+'0');}
-    y*=1000000;
-    intpart=int(y);res+='.';
-    if (y-intpart>=0.999999){intpart++;}
-    digit.clear();
-    while (intpart>0)
+    res+='.';
+    for (int i=1;i<=6;i++)
     {
-      digit.push_back(intpart%10);intpart/=10;
+      y=(y-intpart)*10;intpart=(int)y;
+      res+=(intpart+'0');
     }
-    sz=digit.size();
-    for (int i=sz-1;i>=0;i--){res+=(digit[i]+'0');}
     return res;
   }
   if (x.type()==typeid(int2048))
@@ -498,7 +494,7 @@ bool tobool(std::any x)
         if (val1.type()==typeid(std::string))
         {
           std::string ans="",s=std::any_cast<std::string>(val1);
-          int k=(std::any_cast<int2048>(val2)).toint();
+          int k=toint2048(val2).toint();
           for (int i=1;i<=k;i++){ans+=s;}
           scope.varRegister(var1.argname,ans);
         }
@@ -519,7 +515,15 @@ bool tobool(std::any x)
       {
         if (val1.type()==typeid(double)||val2.type()==typeid(double))
         {
-            scope.varRegister(var1.argname,double(int(todouble(val1)/todouble(val2))));
+            double x=todouble(val1),y=todouble(val2),k=x/y;
+            if (k<0)
+            {
+              scope.varRegister(var1.argname,int2048(k-0.9999999));
+            }
+            else
+            {
+              scope.varRegister(var1.argname,int2048(k));
+            }
         }
         else
         {
@@ -530,8 +534,9 @@ bool tobool(std::any x)
       {
         if (val1.type()==typeid(double)||val2.type()==typeid(double))
         {
-          double x=todouble(val1),y=todouble(val2);
-          scope.varRegister(var1.argname,x-y*int2048(x/y));
+          double r=todouble(val1),v=todouble(val2),k=r/v;
+          int t=(k<0?k-0.99999999:k);
+          scope.varRegister(var1.argname,r-v*t);
         }
         else
         {
@@ -916,15 +921,14 @@ bool tobool(std::any x)
           if (res.type()==typeid(std::string))
           {
             std::string s1="",s2=std::any_cast<std::string>(res);
-            int2048 t=toint2048(val);
-            while (t>=0)
+            int t=toint2048(val).toint();
+            for (int i=1;i<=t;i++)
             {
               s1+=s2;
-              t-=1;
             }
             res=s1;
           }
-          if (res.type()==typeid(double)||val.type()==typeid(double))
+          else if (res.type()==typeid(double)||val.type()==typeid(double))
           {
             res=todouble(res)*todouble(val);
           }
@@ -937,7 +941,13 @@ bool tobool(std::any x)
       {
           if (res.type()==typeid(double)||val.type()==typeid(double))
           {
-            res=int2048(todouble(res)/todouble(val));
+            double x=todouble(res),y=todouble(val),k=x/y;
+            if (k<0)
+            {res=int2048(k-0.9999999);}
+            else
+            {
+              res=int2048(k);
+            }
           }
           else
           {
@@ -952,9 +962,9 @@ bool tobool(std::any x)
       {
           if (res.type()==typeid(double)||val.type()==typeid(double))
           {
-            double r=todouble(res),v=todouble(val);
-            int k=int(r/v);
-            res=r-v*k;
+            double r=todouble(res),v=todouble(val),k=r/v;
+            int t=(k<0?k-0.999999:k);
+            res=r-v*t;
           }
           else
           {
