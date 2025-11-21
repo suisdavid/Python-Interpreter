@@ -230,21 +230,25 @@ std::string tostring(std::any x)
     double y=std::any_cast<double>(x);
     std::string res="";
     if (y<0){y=-y;res="-";}
-    int intpart=(int)y;
+    int intpart=(int)y;y-=intpart;
     if (intpart==0){res+="0";}
     std::vector<int>digit;
     while (intpart>0)
     {
       digit.push_back(intpart%10);intpart/=10;
     }
-    int sz=digit.size();intpart=(int)y;
+    int sz=digit.size();
     for (int i=sz-1;i>=0;i--){res+=(digit[i]+'0');}
-    res+='.';
-    for (int i=1;i<=6;i++)
+    y*=1000000;
+    intpart=int(y);res+='.';
+    if (y-intpart>=0.999999){intpart++;}
+    digit.clear();
+    while (intpart>0)
     {
-      y=(y-intpart)*10;intpart=(int)y;
-      res+=(intpart+'0');
+      digit.push_back(intpart%10);intpart/=10;
     }
+    sz=digit.size();
+    for (int i=sz-1;i>=0;i--){res+=(digit[i]+'0');}
     return res;
   }
   if (x.type()==typeid(int2048))
@@ -1162,20 +1166,6 @@ bool tobool(std::any x)
       }
     }
     res+=temp;
-    /*while (p1<len1||p2<len2)
-    {
-      if (p1==len1){res+=tostring(disarg(visitTestlist(vtest[p2++])));}
-      else if (p2==len2){res+=vstr[p1++]->getText();}
-      else if ((vstr[p1]->getCharPositionInLine())<(ctx->OPEN_BRACE(p2)->getCharPositionInLine()))
-      {
-        res+=vstr[p1++]->getText();
-      }
-      else
-      {
-        res+=tostring(disarg(visitTestlist(vtest[p2++])));
-      }
-    }*/
-
     return res;
   }
 
