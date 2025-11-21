@@ -163,14 +163,23 @@ class int2048 {
 public:
 	std::vector<int>a;
   int len,sym;
-  int toint()
+  long long tolonglong()
   {
-    int res=0;
-    for (int i=0;i<len;i++)
+    long long res=0;
+    for (int i=len-1;i>=0;i--)
     {
         res=res*basis+a[i];
     }
-    return res;
+    return res*sym;
+  }
+  int toint()
+  {
+    int res=0;
+    for (int i=len-1;i>=0;i--)
+    {
+        res=res*basis+a[i];
+    }
+    return res*sym;
   }
   double todouble()
   {
@@ -455,6 +464,17 @@ public:
       if (sym==y.sym||(len==1&&a[0]==0))
       {a.resize(1);a[0]=0;len=1;sym=1;return *this;}
       else{a.resize(1);a[0]=1;sym=-1;return *this;}
+    }
+    if (len<=8)
+    {
+      int2048 x(y);long long p=tolonglong(),q=x.tolonglong();
+      long long val=p/q;
+      if ((p<0&&q>0&&(-p)%q!=0)||(p>0&&q<0&&p%(-q)!=0))
+      {
+        val--;
+      }
+      *this=int2048(val);
+      return *this;
     }
     int2048 x(y),p(*this);
     int temp_symbol = sym * x.sym;
