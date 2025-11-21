@@ -577,8 +577,8 @@ bool tobool(std::any x)
   }
 
   virtual std::any visitFlow_stmt(Python3Parser::Flow_stmtContext *ctx) override {
-    if (ctx->break_stmt()){return (int)Python3Parser::BREAK;}
-    if (ctx->continue_stmt()){return (int)Python3Parser::CONTINUE;}
+    if (ctx->break_stmt()){return constant((int)Python3Parser::BREAK);}
+    if (ctx->continue_stmt()){return  constant((int)Python3Parser::CONTINUE);}
     return visitReturn_stmt(ctx->return_stmt());
   }
 
