@@ -670,7 +670,7 @@ bool tobool(std::any x)
     if (ctx->simple_stmt()){return visitSimple_stmt(ctx->simple_stmt());}
     else
     {
-      std::vector<Python3Parser::StmtContext *>v=std::any_cast<std::vector<Python3Parser::StmtContext *> >(ctx->stmt());
+      std::vector<Python3Parser::StmtContext *>v=ctx->stmt();
       int sz=v.size();
       for (int i=0;i<sz;i++)
       {
@@ -1207,7 +1207,6 @@ bool tobool(std::any x)
     {
       std::string argname=std::any_cast<arg>(visitTest(ctx->test(0))).argname;
       std::any init_val=disarg(visitTest(ctx->test(1)));
-      scope.varRegister(argname,init_val);
       return arg(argname,init_val);
     }
     else
