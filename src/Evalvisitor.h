@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <iomanip>
 #include <iostream>
+#include <cmath>
 using namespace sjtu;
 struct none{none()=default;};
 struct constant
@@ -518,7 +519,7 @@ bool tobool(std::any x)
             double x=todouble(val1),y=todouble(val2),k=x/y;
             if (k<0)
             {
-              scope.varRegister(var1.argname,int2048(k-0.9999999));
+              scope.varRegister(var1.argname,int2048(floor(k)));
             }
             else
             {
@@ -535,7 +536,7 @@ bool tobool(std::any x)
         if (val1.type()==typeid(double)||val2.type()==typeid(double))
         {
           double r=todouble(val1),v=todouble(val2),k=r/v;
-          int t=(k<0?k-0.99999999:k);
+          int t=(k<0?floor(k):k);
           scope.varRegister(var1.argname,r-v*t);
         }
         else
@@ -936,7 +937,7 @@ bool tobool(std::any x)
           {
             double x=todouble(res),y=todouble(val),k=x/y;
             if (k<0)
-            {res=int2048(k-0.9999999);}
+            {res=int2048(floor(k));}
             else
             {
               res=int2048(k);
