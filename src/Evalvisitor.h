@@ -17,7 +17,7 @@ struct constant
 {
   int constid;
   std::any ret_val;
-  constant(int id=0,std::any x=none())
+  constant(int id,std::any x=none())
   {
     constid=id;ret_val=x;
   }
@@ -1136,38 +1136,30 @@ bool tobool(std::any x)
     std::vector<Python3Parser::TestlistContext *>vtest=ctx->testlist();
     std::string res="";
     std::string s=ctx->getText();int len=s.length();
-    std::string temp="";
-    int cnt=0,flg=0;
+    int cnt=0;
     for (int i=2;i<len-1;i++)
     {
-      if (!flg)
-      {
         if (s[i]=='{')
         {
           if (s[i+1]=='{')
           {
-            temp+='{';i++;
+            res+='{';i++;
           }
           else
           {
-            res+=temp;temp="";flg=1;res+=tostring(disarg(visitTestlist(vtest[cnt++])));
+            res+=tostring(disarg(visitTestlist(vtest[cnt++])));
+            i+=vtest[cnt-1]->getText().length()+1;
           }
         }
         else if (s[i]=='}')
         {
-          temp+='}';i++;
+          res+='}';i++;
         }
         else
         {
-          temp+=s[i];
+          res+=s[i];
         }
-      }
-      else if (s[i]=='}')
-      {
-        flg=0;
-      }
     }
-    res+=temp;
     return res;
   }
 
