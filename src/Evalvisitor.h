@@ -538,11 +538,11 @@ bool tobool(std::any x)
             double x=todouble(val1),y=todouble(val2),k=x/y;
             if (k<0)
             {
-              scope.varRegister(var1.argname,int2048(floor(k)));
+              scope.varRegister(var1.argname,floor(k));
             }
             else
             {
-              scope.varRegister(var1.argname,int2048(k));
+              scope.varRegister(var1.argname,floor(k));
             }
         }
         else
@@ -955,12 +955,7 @@ bool tobool(std::any x)
           if (res.type()==typeid(double)||val.type()==typeid(double))
           {
             double x=todouble(res),y=todouble(val),k=x/y;
-            if (k<0)
-            {res=int2048(floor(k));}
-            else
-            {
-              res=int2048(k);
-            }
+            res=floor(k);
           }
           else
           {
@@ -976,7 +971,7 @@ bool tobool(std::any x)
           if (res.type()==typeid(double)||val.type()==typeid(double))
           {
             double r=todouble(res),v=todouble(val),k=r/v;
-            int t=(k<0?k-0.999999:k);
+            int t=floor(k);
             res=r-v*t;
           }
           else
@@ -1240,4 +1235,3 @@ bool tobool(std::any x)
 
 
 #endif//PYTHON_INTERPRETER_EVALVISITOR_H
-
