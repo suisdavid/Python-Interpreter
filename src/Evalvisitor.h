@@ -229,6 +229,10 @@ std::string tostring(std::any x)
           {
             res+='\t';i++;
           }
+          else if (s[i+1]=='r')
+          {
+            res+='\r';i++;
+          }
         }
         else
         {
@@ -1185,6 +1189,10 @@ bool tobool(std::any x)
           {
             res+='\t';i++;
           }
+          else if (s[i+1]=='r')
+          {
+            res+='\r';i++;
+          }
         }
         else{res+=s[i];}
     }
@@ -1232,3 +1240,4 @@ bool tobool(std::any x)
 
 
 #endif//PYTHON_INTERPRETER_EVALVISITOR_H
+
