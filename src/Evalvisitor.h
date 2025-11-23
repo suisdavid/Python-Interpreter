@@ -150,20 +150,7 @@ int2048 toint2048(std::any x)
   if (x.type()==typeid(std::string))
   {
     std::string s=std::any_cast<std::string>(x);
-    int len=s.length();int2048 res=0;
-    if (s[0]=='-')
-    {
-      for (int i=1;i<len;i++)
-      {
-        res=res*10+(s[i]-'0');
-      }
-      return -res;
-    }
-    for (int i=0;i<len;i++)
-    {
-      res=res*10+(s[i]-'0');
-    }
-    return res; 
+    return int2048(s);
   }
 }
 double todouble(std::any x)
@@ -1160,10 +1147,14 @@ bool tobool(std::any x)
         {
           res+='}';i++;
         }
-        else
+        else if (s[i]=='\\')
         {
-          res+=s[i];
+          if (s[i+1]=='\\')
+          {
+            res+='\\';i++;
+          }
         }
+        else{res+=s[i];}
     }
     return res;
   }
@@ -1209,4 +1200,3 @@ bool tobool(std::any x)
 
 
 #endif//PYTHON_INTERPRETER_EVALVISITOR_H
-
