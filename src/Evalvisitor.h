@@ -268,6 +268,10 @@ std::string tostring(std::any x)
     std::string res=(y?"True":"False");
     return res;
   }
+  if (x.type()==typeid(none))
+  {
+    return "None";
+  }
 }
 int toint(std::string s)
 {
@@ -1205,3 +1209,4 @@ bool tobool(std::any x)
 
 
 #endif//PYTHON_INTERPRETER_EVALVISITOR_H
+
