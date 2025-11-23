@@ -211,7 +211,31 @@ std::string tostring(std::any x)
   x=disarg(x);
   if (x.type()==typeid(std::string))
   {
-    return std::any_cast<std::string>(x);
+    std::string res="",s=std::any_cast<std::string>(x);
+    int len=s.length();
+    for (int i=0;i<len;i++)
+    {
+        if (s[i]=='\\')
+        {
+          if (s[i+1]=='\\')
+          {
+            res+='\\';i++;
+          }
+          else if (s[i+1]=='n')
+          {
+            res+='\n';i++;
+          }
+          else if (s[i+1]=='t')
+          {
+            res+='\t';i++;
+          }
+        }
+        else
+        {
+          res+=s[i];
+        }
+    }
+    return res;
   }
   if (x.type()==typeid(double))
   {
@@ -485,7 +509,7 @@ bool tobool(std::any x)
       {
         if (val1.type()==typeid(std::string))
         {
-          std::string ans="",s=std::any_cast<std::string>(val1);
+          std::string ans="",s=tostring(val1);
           int k=toint2048(val2).toint();
           for (int i=1;i<=k;i++){ans+=s;}
           scope.varRegister(var1.argname,ans);
@@ -798,7 +822,7 @@ bool tobool(std::any x)
       }
       else if (lstval.type()==typeid(std::string)&&curval.type()==typeid(std::string))
       {
-        std::string lst=std::any_cast<std::string>(lstval),cur=std::any_cast<std::string>(curval);
+        std::string lst=tostring(lstval),cur=tostring(curval);
         if (comp==(int)Python3Parser::LESS_THAN)
         {
           res2=(lst<cur);
@@ -860,7 +884,7 @@ bool tobool(std::any x)
       {
           if (res.type()==typeid(std::string))
           {
-            res=std::any_cast<std::string>(res)+std::any_cast<std::string>(val);
+            res=tostring(res)+tostring(val);
           }
           else if (res.type()==typeid(double)||val.type()==typeid(double))
           {
@@ -905,7 +929,7 @@ bool tobool(std::any x)
       {
           if (res.type()==typeid(std::string))
           {
-            std::string s1="",s2=std::any_cast<std::string>(res);
+            std::string s1="",s2=tostring(res);
             int t=toint2048(val).toint();
             for (int i=1;i<=t;i++)
             {
@@ -1152,6 +1176,14 @@ bool tobool(std::any x)
           if (s[i+1]=='\\')
           {
             res+='\\';i++;
+          }
+          else if (s[i+1]=='n')
+          {
+            res+='\n';i++;
+          }
+          else if (s[i+1]=='t')
+          {
+            res+='\t';i++;
           }
         }
         else{res+=s[i];}
