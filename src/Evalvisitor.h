@@ -172,38 +172,7 @@ double todouble(std::any x)
   }
   if (x.type()==typeid(std::string))
   {
-    int intpart=0,flg=1;double res=0,pw=1.0;
-    std::string s=std::any_cast<std::string>(x);
-    int len=s.length();
-    if (s[0]=='-')
-    {
-      for (int i=1;i<len;i++)
-      {
-        if (s[i]=='.'){flg=0;continue;}
-        if (flg)
-        {
-          intpart=intpart*10+(s[i]-'0');
-        }
-        else
-        {
-          pw/=10;res+=pw*(s[i]-'0');
-        }
-      }
-    return -(res+intpart);
-    }
-    for (int i=0;i<len;i++)
-    {
-      if (s[i]=='.'){flg=0;continue;}
-      if (flg)
-      {
-        intpart=intpart*10+(s[i]-'0');
-      }
-      else
-      {
-        pw/=10;res+=pw*(s[i]-'0');
-      }
-    }
-    return res+intpart;
+    return std::stod(std::any_cast<std::string>(x));
   }
 }
 std::string tostring(std::any x)
@@ -243,30 +212,12 @@ std::string tostring(std::any x)
   }
   if (x.type()==typeid(double))
   {
-    double y=std::any_cast<double>(x);
-    std::string res="";
-    if (y<0){y=-y;res="-";}
-    int intpart=(int)y;
-    if (intpart==0){res+="0";}
-    std::vector<int>digit;
-    while (intpart>0)
-    {
-      digit.push_back(intpart%10);intpart/=10;
-    }
-    int sz=digit.size();intpart=(int)y;
-    for (int i=sz-1;i>=0;i--){res+=(digit[i]+'0');}
-    res+='.';
-    for (int i=1;i<=6;i++)
-    {
-      y=(y-intpart)*10;intpart=(int)y;
-      res+=(intpart+'0');
-    }
-    return res;
+    return std::to_string(std::any_cast<double>(x));
   }
   if (x.type()==typeid(int2048))
   {
     int2048 y=std::any_cast<int2048>(x);std::string res="";
-    if (y==0){return res;}
+    if (y==0){return "0";}
     if (y<0){y=-y;res="-";}
     std::vector<int>digit;
     while (y>0)
@@ -536,14 +487,7 @@ bool tobool(std::any x)
         if (val1.type()==typeid(double)||val2.type()==typeid(double))
         {
             double x=todouble(val1),y=todouble(val2),k=x/y;
-            if (k<0)
-            {
-              scope.varRegister(var1.argname,floor(k));
-            }
-            else
-            {
-              scope.varRegister(var1.argname,floor(k));
-            }
+            scope.varRegister(var1.argname,floor(k));
         }
         else
         {
@@ -555,7 +499,7 @@ bool tobool(std::any x)
         if (val1.type()==typeid(double)||val2.type()==typeid(double))
         {
           double r=todouble(val1),v=todouble(val2),k=r/v;
-          int t=(k<0?floor(k):k);
+          int t=floor(k);
           scope.varRegister(var1.argname,r-v*t);
         }
         else
@@ -1235,3 +1179,4 @@ bool tobool(std::any x)
 
 
 #endif//PYTHON_INTERPRETER_EVALVISITOR_H
+
