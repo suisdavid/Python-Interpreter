@@ -885,6 +885,16 @@ bool tobool(std::any x)
             }
             res=s1;
           }
+          else if (val.type()==typeid(std::string))
+          {
+            std::string s1="",s2=tostring(val);
+            int t=toint2048(res).toint();
+            for (int i=1;i<=t;i++)
+            {
+              s1+=s2;
+            }
+            res=s1;
+          }
           else if (res.type()==typeid(double)||val.type()==typeid(double))
           {
             res=todouble(res)*todouble(val);
@@ -1179,4 +1189,3 @@ bool tobool(std::any x)
 
 
 #endif//PYTHON_INTERPRETER_EVALVISITOR_H
-
